@@ -1,0 +1,15 @@
+\#*#
+devel.db
+media/
+local_settings.py
+*~
+*.py[co]
+*.swp
+*.orig
+*.rej
+.DS_Store
+*.mo
+.*project
+*.ignoreme
+.env*
+*.log

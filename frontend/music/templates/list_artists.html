@@ -1,0 +1,5 @@
+{% for artist in artists %}
+    <img src="{{ artist.image}}" />
+    <a href="{{ artist.url }}">{{ artist.name }}</a>
+    <br />
+{% endfor %}
