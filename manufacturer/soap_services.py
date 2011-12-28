@@ -3,6 +3,7 @@ import thread
 import random
 import logging
 import sys
+import os
 from time import sleep
 
 from soaplib.core.service import soap, DefinitionBase
@@ -11,7 +12,9 @@ from soaplib.core.model.primitive import String
 from soaplib.core import Application
 from wsgiref.simple_server import make_server
 
-sys.path.append("..")
+pardir = os.path.abspath(os.path.pardir)
+sys.path.append(pardir)
+cdmaker = pardir.rsplit(os.path.sep)[-1]
 from cdmaker.log import logger
 
 logger.setLevel(logging.INFO)
