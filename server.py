@@ -19,12 +19,5 @@ if __name__=='__main__':
            print "Error: unable to start process %s"%(str(e),)
 
     # Start frontend and wait for calls
-    process = subprocess.Popen(
-        [
-            'python',
-            'frontend/manage.py',
-            'runserver',
-            '%s:%s'%("127.0.0.1", 8000,),
-        ],
-    )
+    process = subprocess.Popen(['python', 'frontend/server.py'])
     process.wait()
