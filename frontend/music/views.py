@@ -3,7 +3,7 @@ from django.views.generic import FormView, ListView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-from music.forms import GetArtistForm
+from music.forms import GetArtistForm, GetUserInfoForm
 from music.services import MusicBackofficeClient
 
 class GetArtistsView(FormView):
@@ -38,20 +38,33 @@ class ListArtistsView(ListView):
             in artists['results']['artistmatches']['artist']
         ]
 
-class ListArtistTracksView(ListView):
+class ListArtistTracksView(FormView):
     template_name = 'list_artist_tracks.html'
     context_object_name = 'tracks'
+    form_class = GetUserInfoForm
+
+    def form_valid(self, form):
+        artist_name = form.cleaned_data['artist_name']
+
+        return HttpResponseRedirect(
+            reverse('list_artists', args=[artist_name])
+        )
+
 
     def _helper_track_info_dict(self, track):
         return {
             'name':track.get('name')
         }
 
-    def get_queryset(self):
+    def get_context_data(self, **kwargs):
         tracks = MusicBackofficeClient().get_artist_tracks(self.args[0])
 
-        return [
+        new_tracks = [
             self._helper_track_info_dict(track)
             for track
             in tracks['toptracks']['track']
         ]
+
+        kwargs['tracks'] = new_tracks
+
+        return kwargs

@@ -1,10 +1,16 @@
 <form action="" method="post">{% csrf_token %}
-<ul>
-{% for track in tracks %}
-    <li>
-        <span>{{ track.name }}</span>
-        <input type="checkbox" name="{{ track.name }}">
-    </li>
-{% endfor %}
-</ul>
-</form>
+    <div style="float: left;">
+        <ul>
+            {% for track in tracks %}
+            <li>
+                <input type="checkbox" name="{{ track.name }}">
+                <span>{{ track.name }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style="float: left;">
+        {{ form.as_p }}
+        <input type="submit" value="Submit" />
+    </div>
+    </form>
