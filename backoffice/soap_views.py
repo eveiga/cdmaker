@@ -13,6 +13,7 @@ from wsgiref.simple_server import make_server
 sys.path.append("..")
 from cdmaker.log import logger
 from lastfm_client import LastFMClient
+from soap_definitions import Order
 
 logger.setLevel(logging.INFO)
 
@@ -23,15 +24,23 @@ class MusicService(DefinitionBase):
         logger.info("Backoffice: Returning request for artist search")
         return response
 
-
     @soap(String, _returns=String)
     def getTracks(self, artist_name):
         response = LastFMClient().getArtistTracks(unquote(artist_name))
         logger.info("Backoffice: Returning request for tracks search")
         return response
 
-class OrderService(DefinitionBase):
+
+def process_order(order):
     pass
+
+class OrderService(DefinitionBase):
+    @soap(Order,  _returns=String)
+    def submitOrder(self, order):
+        import ipdb; ipdb.set_trace()
+        thread.start_new_thread(process_order, (order,))
+        logger.info("Backoffice: Returning async request for submit order")
+        return "OrderID"
 
 
 if __name__=="__main__":
