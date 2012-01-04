@@ -27,6 +27,7 @@ def calculate_budget_price(callback_endpoint):
     logger.info("Calculated %d€ price"%(random_price,))
 
     #Send budget to backoffice callback endpoint
+    return
 
 class BudgetService(DefinitionBase):
     @soap(String, _returns=String)

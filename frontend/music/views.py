@@ -38,6 +38,7 @@ class ListArtistsView(ListView):
             in artists['results']['artistmatches']['artist']
         ]
 
+
 class ListArtistTracksView(FormView):
     template_name = 'list_artist_tracks.html'
     context_object_name = 'tracks'
