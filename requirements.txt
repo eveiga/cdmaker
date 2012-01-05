@@ -6,3 +6,4 @@ lxml==2.3.2
 soaplib==2.0.0-beta2
 suds==0.4
 ujson==1.15
+SQLAlchemy==0.7.4

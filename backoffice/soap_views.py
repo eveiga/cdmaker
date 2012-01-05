@@ -6,7 +6,7 @@ from urllib import unquote
 
 from soaplib.core.service import soap, DefinitionBase
 from soaplib.core.server import wsgi
-from soaplib.core.model.primitive import String
+from soaplib.core.model.primitive import String, Integer
 from soaplib.core import Application
 from wsgiref.simple_server import make_server
 
@@ -33,16 +33,19 @@ class MusicService(DefinitionBase):
         return response
 
 
-def process_order(order):
-    pass
-
 class OrderService(DefinitionBase):
-    @soap(Order,  _returns=String)
+    @soap(Order,  _returns=Integer)
     def submitOrder(self, order):
-        import ipdb; ipdb.set_trace()
-        thread.start_new_thread(process_order, (order,))
+        #persist the new order
+        processor = OrderProcessor()
+        new_order = processor.create_order(order.name, order.address)
+
+        #create thread and process order
+        pass
+
+        #return the order unique id
         logger.info("Backoffice: Returning async request for submit order")
-        return "OrderID"
+        return new_order
 
 
 if __name__=="__main__":
