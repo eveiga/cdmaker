@@ -23,7 +23,13 @@ class MusicBackofficeClient(BackofficeClient):
 
 
 class OrderBackofficeClient(BackofficeClient):
-    def submit_order(self, tracks, user_name, address):
-        user_data = self.client.factory.create('User')
-        user_data.name = user_name
-        user_data.address = address
+    def submit_order(self, selected_tracks, user_name, address):
+        order = self.client.factory.create("ns0:Order")
+
+        order.name = user_name
+        order.address = address
+        tracks = self.client.factory.create("stringArray")
+        tracks.string = selected_tracks
+        order.tracks = tracks
+
+        return self.client.service.submitOrder(order)

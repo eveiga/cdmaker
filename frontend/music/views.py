@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from django.views.generic import FormView, ListView
+from django.views.generic import FormView, ListView, TemplateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
 from music.forms import GetArtistForm, GetUserInfoForm
-from music.services import MusicBackofficeClient
+from music.services import MusicBackofficeClient, OrderBackofficeClient
 
 class GetArtistsView(FormView):
     template_name = 'get_artists.html'
@@ -45,12 +45,16 @@ class ListArtistTracksView(FormView):
     form_class = GetUserInfoForm
 
     def form_valid(self, form):
-        artist_name = form.cleaned_data['artist_name']
+        user_name = form.cleaned_data['name']
+        address = form.cleaned_data['address']
+        blacklist = ['name','address','csrfmiddlewaretoken']
+        tracks = [f for f in form.data.keys() if f not in blacklist]
+
+        msg = OrderBackofficeClient().submit_order(tracks, user_name, address)
 
         return HttpResponseRedirect(
-            reverse('list_artists', args=[artist_name])
+            reverse('checkout', args=[msg])
         )
-
 
     def _helper_track_info_dict(self, track):
         return {
@@ -68,4 +72,21 @@ class ListArtistTracksView(FormView):
 
         kwargs['tracks'] = new_tracks
 
+        return kwargs
+
+
+class CheckoutView(TemplateView):
+    template_name = 'checkout.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs['uri_index'] = reverse('index')
+        kwargs['order_id'] = self.args[0]
+        return kwargs
+
+
+class IndexView(TemplateView):
+    template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
+        kwargs['uri_artists'] = reverse('get_artists')
         return kwargs
