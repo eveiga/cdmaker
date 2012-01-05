@@ -14,13 +14,15 @@ sys.path.append("..")
 from cdmaker.log import logger
 from lastfm_client import LastFMClient
 from soap_definitions import Order
+from services import OrderProcessor
 
 logger.setLevel(logging.INFO)
+
 
 class MusicService(DefinitionBase):
     @soap(String, _returns=String)
     def searchArtist(self, artist_name):
-        response = LastFMClient().getArtists(artist_name)
+        response = LastFMClient().getArtists(unquote(artist_name))
         logger.info("Backoffice: Returning request for artist search")
         return response
 
