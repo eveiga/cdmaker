@@ -22,6 +22,6 @@ class Order(Base):
     distance_manufacturerC = Column(Integer)
 
 
-engine = create_engine('sqlite:///orders.db', echo=True)
+engine = create_engine('sqlite:///backoffice/orders.db', echo=True)
 
 create_table = lambda engine: Base.metadata.create_all(engine)
