@@ -5,7 +5,7 @@ def start_supplier(host, port):
     pass
 
 def start_manufacturer(host, port):
-    subprocess.Popen(['python', 'manufacturer/soap_services.py', host, port],)
+    subprocess.Popen(['python', 'manufacturer/soap_views.py', host, port],)
 
 def start_backoffice(host, port):
     subprocess.Popen(['python', 'backoffice/soap_views.py', host, port],)
