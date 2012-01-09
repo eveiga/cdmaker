@@ -21,7 +21,7 @@ from soap_client import BackofficeClient
 
 logger.setLevel(logging.INFO)
 
-def calculate_budget_price(order, tracks):
+def calculate_budget_price(order, address):
     sleep(2)
 
     #Get random price
@@ -30,12 +30,11 @@ def calculate_budget_price(order, tracks):
 
     #Send budget to backoffice callback endpoint
     BackofficeClient().get_budget_callback(order, random_price)
-    return
 
 class BudgetService(DefinitionBase):
-    @soap(Integer, Array(String), _returns=String)
-    def getBudget(self, order, tracks):
-        thread.start_new_thread(calculate_budget_price, (order, tracks,))
+    @soap(Integer, String, _returns=String)
+    def getBudget(self, order, address):
+        thread.start_new_thread(calculate_budget_price, (order, address,))
         logger.info("Returning async request")
         return "OK"
 

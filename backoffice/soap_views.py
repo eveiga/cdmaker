@@ -47,6 +47,10 @@ class OrderService(DefinitionBase):
         logger.info("Backoffice: Returning async request for submit order")
         return new_order
 
+    @soap(Integer, Integer, _returns=String)
+    def getBudgetResponse(self, order, price):
+        pass
+
 
 if __name__=="__main__":
     host = sys.argv[1]
