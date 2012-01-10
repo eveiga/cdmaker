@@ -2,6 +2,9 @@
 import httplib2
 from urllib import urlencode
 
+import ujson
+
+
 class RestClient(object):
     def __init__(self):
         self.http = httplib2.Http()
@@ -35,6 +38,21 @@ class LastFMClient(RestClient):
             format="json",
             artist=artist_name,
             method="artist.gettoptracks",
+        )
+
+        return content
+
+
+class GoogleMapsApiClient(RestClient):
+    base_url = "http://maps.googleapis.com/maps/api/distancematrix/json"
+
+    def get_distance(self, origin, destiny):
+        response, content = self.make_request(
+            url=self.base_url,
+            language='pt-PT',
+            sensor='false',
+            origins=origin,
+            destinations=destiny,
         )
 
         return content

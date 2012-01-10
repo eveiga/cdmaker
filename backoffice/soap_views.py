@@ -12,9 +12,10 @@ from wsgiref.simple_server import make_server
 
 sys.path.append("..")
 from cdmaker.log import logger
-from lastfm_client import LastFMClient
-from soap_definitions import Order
-from services import OrderProcessor
+from rest_client import LastFMClient
+from soap_definitions import Order, Auth
+from services import (OrderProcessor, is_valid_request, create_budget,
+    verify_and_finalize_order)
 
 logger.setLevel(logging.INFO)
 
@@ -41,15 +42,20 @@ class OrderService(DefinitionBase):
         new_order = processor.create_order(order.name, order.address)
 
         #create thread and process order
-        pass
+        thread.start_new_thread(
+            processor.process_order,
+            (order.tracks,),
+        )
 
         #return the order unique id
         logger.info("Backoffice: Returning async request for submit order")
-        return new_order
+        return new_order.id
 
-    @soap(Integer, Integer, _returns=String)
-    def getBudgetResponse(self, order, price):
-        pass
+    @soap(Integer, Integer, Auth, _returns=String)
+    def getBudgetResponse(self, order, price, auth):
+        if is_valid_request(auth):
+            create_budget(auth.user_id, order, price)
+            verify_and_finalize_order(order)
 
 
 if __name__=="__main__":

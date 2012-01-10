@@ -21,7 +21,7 @@ from soap_client import BackofficeClient
 
 logger.setLevel(logging.INFO)
 
-def calculate_budget_price(order, tracks):
+def calculate_budget_price(order, tracks, user_id):
     sleep(2)
 
     #Get random price
@@ -29,21 +29,38 @@ def calculate_budget_price(order, tracks):
     logger.info("Calculated %d€ price"%(random_price,))
 
     #Send budget to backoffice callback endpoint
-    BackofficeClient().get_budget_callback(order, random_price)
+    BackofficeClient().get_budget_callback(order, random_price, user_id,)
     return
 
 class BudgetService(DefinitionBase):
+    def __init__(self, user_id, *args, **kwargs):
+        self.user_id = user_id
+        super(BudgetService, self).__init__(*args, **kwargs)
+
     @soap(Integer, Array(String), _returns=String)
     def getBudget(self, order, tracks):
-        thread.start_new_thread(calculate_budget_price, (order, tracks,))
+        thread.start_new_thread(
+            calculate_budget_price,
+            (order, tracks, self.user_id,)
+        )
         logger.info("Returning async request")
         return "OK"
+
 
 if __name__=="__main__":
     host = sys.argv[1]
     port = int(sys.argv[2])
+    user_id_dict={
+        '7888':'manufacturerA',
+        '7889':'manufacturerB',
+        '7890':'manufacturerC',
+    }
 
-    soap_application = Application([BudgetService], 'tns')
+    class BudgetApplication(Application):
+        def get_service(self, service, *args, **kwargs):
+            return service(user_id_dict.get(str(port)))
+
+    soap_application = BudgetApplication([BudgetService], 'tns')
     wsgi_application = wsgi.Application(soap_application)
     server = make_server(host, port, wsgi_application)
     logger.info("Manufacturer serving on %s:%s"%(host,port,))

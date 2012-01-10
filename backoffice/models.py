@@ -21,6 +21,8 @@ class Order(Base):
     distance_manufacturerB = Column(Integer)
     distance_manufacturerC = Column(Integer)
 
+    def has_all_data(self):
+        pass
 
 engine = create_engine('sqlite:///backoffice/orders.db', echo=True)
 
