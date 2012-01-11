@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+from soaplib.core.service import soap, DefinitionBase
+from soaplib.core.model.primitive import String, Integer
+from soaplib.core import Application
 from django.views.generic import FormView, ListView, TemplateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
 from music.forms import GetArtistForm, GetUserInfoForm
 from music.services import MusicBackofficeClient, OrderBackofficeClient
+from soap_handler import DjangoSOAPAdaptor
 
 class GetArtistsView(FormView):
     template_name = 'get_artists.html'
@@ -90,3 +94,16 @@ class IndexView(TemplateView):
     def get_context_data(self, **kwargs):
         kwargs['uri_artists'] = reverse('get_artists')
         return kwargs
+
+
+class OrderStatusService(DefinitionBase):
+    @soap(Integer, String, _returns=String)
+    def changeStatusOrder(self, order, status):
+        return "OK"
+
+
+orderstatus_service = DjangoSOAPAdaptor(
+    Application(
+        [OrderStatusService], 'tns'
+    )
+)

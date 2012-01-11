@@ -24,6 +24,10 @@ carriers = {
     'carrierC':'http://localhost:7887/?wsdl',
 }
 
+frontend = 'http://localhost:8000/music/orderstatusservice/?wsdl'
+
+user_id = "backoffice"
+
 class Order(ClassModel):
     __namespace__ = "order"
     name = String

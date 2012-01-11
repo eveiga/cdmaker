@@ -21,35 +21,38 @@ logger.setLevel(logging.INFO)
 
 
 class MusicService(DefinitionBase):
-    @soap(String, _returns=String)
-    def searchArtist(self, artist_name):
-        response = LastFMClient().getArtists(unquote(artist_name))
-        logger.info("Backoffice: Returning request for artist search")
-        return response
+    @soap(String, Auth, _returns=String)
+    def searchArtist(self, artist_name, auth):
+        if is_valid_request(auth):
+            response = LastFMClient().getArtists(unquote(artist_name))
+            logger.info("Backoffice: Returning request for artist search")
+            return response
 
-    @soap(String, _returns=String)
-    def getTracks(self, artist_name):
-        response = LastFMClient().getArtistTracks(unquote(artist_name))
-        logger.info("Backoffice: Returning request for tracks search")
-        return response
+    @soap(String, Auth, _returns=String)
+    def getTracks(self, artist_name, auth):
+        if is_valid_request(auth):
+            response = LastFMClient().getArtistTracks(unquote(artist_name))
+            logger.info("Backoffice: Returning request for tracks search")
+            return response
 
 
 class OrderService(DefinitionBase):
-    @soap(Order,  _returns=Integer)
-    def submitOrder(self, order):
-        #persist the new order
-        processor = OrderProcessor()
-        new_order = processor.create_order(order.name, order.address)
+    @soap(Order,  Auth, _returns=Integer)
+    def submitOrder(self, order, auth):
+        if is_valid_request(auth):
+            #persist the new order
+            processor = OrderProcessor()
+            new_order = processor.create_order(order.name, order.address)
 
-        #create thread and process order
-        thread.start_new_thread(
-            processor.process_order,
-            (order.tracks,),
-        )
+            #create thread and process order
+            thread.start_new_thread(
+                processor.process_order,
+                (order.tracks,),
+            )
 
-        #return the order unique id
-        logger.info("Backoffice: Returning async request for submit order")
-        return new_order.id
+            #return the order unique id
+            logger.info("Backoffice: Returning async request for submit order")
+            return new_order.id
 
     @soap(Integer, Integer, Auth, _returns=String)
     def getBudgetResponse(self, order, price, auth):

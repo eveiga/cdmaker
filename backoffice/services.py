@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-import ujson
 from base64 import standard_b64encode
 from hashlib import sha1
 
 from sqlalchemy.orm import sessionmaker
+import ujson
 
 from models import Order, engine, create_table
-from soap_client import ManufacturerClient, CarrierClient
-from soap_definitions import manufacturers, carriers
+from soap_client import ManufacturerClient, CarrierClient, FrontEndClient
+from soap_definitions import manufacturers, carriers, frontend
 from rest_client import GoogleMapsApiClient
 
 def generate_hmac(self, *args):
@@ -35,6 +35,50 @@ def create_budget(user_id, order_id, price):
 def verify_and_finalize_order(order_id):
     session = sessionmaker(bind=engine)()
     order = session.query(Order).filter_by(id=order_id).one()
+    if order.has_all_data():
+        # We have all the info we need to choose the best pair
+        best_sum = 999999999
+
+        for manufacturer in manufacturers.iterkeys():
+            for carrier in carriers.iterkeys():
+                budget_man = getattr(order, "budget_%s"%(manufacturer,))
+                budget_car = getattr(order, "budget_%s"%(carrier,))
+
+                distance = getattr(order, "distance_%s"%(manufacturer,))
+                distance_footprint = ((distance*0.001)*0.26)/1000
+
+                actual = sum([budget_man, budget_car, distance_footprint])
+                if actual < best_sum:
+                    best_sum = actual
+                    best_manufacturer = manufacturer
+                    best_carrier = carrier
+
+        Notificatior(best_manufacturer, best_carrier, order_id).notificate()
+
+
+class Notificatior(object):
+    def __init__(self, manufacturer, carrier, order_id):
+        self.manufacturer = manufacturer
+        self.carrier = carrier
+        self.order_id = order_id
+
+    def notificate_carrier(self):
+        CarrierClient(
+            carriers[self.carrier]
+        ).confirmBudget(self.order_id)
+
+    def notificate_manufacturer(self):
+        ManufacturerClient(
+            manufacturers[self.manufacturer]['endpoint']
+        ).confirmBudget(self.order_id)
+
+    def notificate_frontend(self):
+        FrontEndClient(frontend).changeStatusOrder(self.order_id)
+
+    def notificate(self):
+        self.notificate_manufacturer()
+        self.notificate_carrier()
+        self.notificate_frontend()
 
 
 class OrderProcessor(object):

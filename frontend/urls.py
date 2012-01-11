@@ -1,12 +1,7 @@
 from django.conf.urls.defaults import patterns, url
 
 from music.views import (GetArtistsView, ListArtistsView, ListArtistTracksView,
-        CheckoutView, IndexView)
-
-
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+        CheckoutView, IndexView, orderstatus_service)
 
 urlpatterns = patterns('',
     url(r'^music/$', IndexView.as_view(), name='index',),
@@ -25,4 +20,6 @@ urlpatterns = patterns('',
         CheckoutView.as_view(),
         name='checkout'
     ),
+    url(r'orderstatusservice.wsdl', orderstatus_service),
+    url(r'orderstatusservice', orderstatus_service),
 )

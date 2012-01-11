@@ -16,11 +16,21 @@ pardir = os.path.abspath(os.path.pardir)
 sys.path.append(pardir)
 cdmaker = pardir.rsplit(os.path.sep)[-1]
 from cdmaker.log import logger
-from soap_client import BackofficeClient
+from soap_client import BackofficeClient, generate_hmac
+from soap_definitions import Auth
 
 logger.setLevel(logging.INFO)
 
-def calculate_budget_price(order, address, user_id):
+def is_valid_request(auth):
+    expected_hmac=generate_hmac(
+        auth.user_id,
+        auth.timestamp,
+        "password",
+    )
+
+    return expected_hmac==auth.hmac
+
+def calculate_budget_price(order, name, address, user_id):
     sleep(2)
 
     #Get random price
@@ -30,19 +40,27 @@ def calculate_budget_price(order, address, user_id):
     #Send budget to backoffice callback endpoint
     BackofficeClient().get_budget_callback(order, random_price, user_id)
 
+
 class BudgetService(DefinitionBase):
     def __init__(self, user_id, *args, **kwargs):
         self.user_id = user_id
         super(BudgetService, self).__init__(*args, **kwargs)
 
-    @soap(Integer, String, _returns=String)
-    def getBudget(self, order, address):
-        thread.start_new_thread(
-            calculate_budget_price,
-            (order, address, self.user_id,)
-        )
-        logger.info("Returning async request")
-        return "OK"
+    @soap(Integer, String, String, Auth, _returns=String)
+    def getBudget(self, order, name, address, auth):
+        if is_valid_request(auth):
+            thread.start_new_thread(
+                calculate_budget_price,
+                (order, name, address, self.user_id,)
+            )
+            logger.info("%s Returning async request for getBudget"%(self.user_id,))
+            return "OK"
+
+    @soap(Integer, Auth, _returns=String)
+    def confirmBudget(self, order, auth):
+        if is_valid_request(auth):
+            logger.info("%s Returning async request for confirmBudget"%(self.user_id,))
+            return "OK"
 
 if __name__=="__main__":
     host = sys.argv[1]

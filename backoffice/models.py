@@ -22,8 +22,16 @@ class Order(Base):
     distance_manufacturerC = Column(Integer)
 
     def has_all_data(self):
-        pass
+        return all([
+            self.budget_carrierA,
+            self.budget_carrierB,
+            self.budget_carrierC,
+            self.budget_manufacturerA,
+            self.budget_manufacturerB,
+            self.budget_manufacturerC,
+        ])
 
-engine = create_engine('sqlite:///backoffice/orders.db', echo=True)
+
+engine = create_engine('sqlite:///backoffice/orders.db', echo=False)
 
 create_table = lambda engine: Base.metadata.create_all(engine)
