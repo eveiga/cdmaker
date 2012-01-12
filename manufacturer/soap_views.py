@@ -33,7 +33,7 @@ def is_valid_request(auth):
     return expected_hmac==auth.hmac
 
 def calculate_budget_price(order, tracks, user_id):
-    sleep(2)
+    sleep(10)
 
     #Get random price
     random_price = random.randint(1,10)
