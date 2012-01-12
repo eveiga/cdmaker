@@ -5,6 +5,8 @@ from soaplib.core import Application
 from django.views.generic import FormView, ListView, TemplateView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from music.forms import GetArtistForm, GetUserInfoForm
 from music.services import MusicBackofficeClient, OrderBackofficeClient
@@ -13,6 +15,10 @@ from soap_handler import DjangoSOAPAdaptor
 class GetArtistsView(FormView):
     template_name = 'get_artists.html'
     form_class = GetArtistForm
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(GetArtistsView, self).dispatch(*args, **kwargs)
 
     def form_valid(self, form):
         artist_name = form.cleaned_data['artist_name']
@@ -25,6 +31,10 @@ class GetArtistsView(FormView):
 class ListArtistsView(ListView):
     template_name = 'list_artists.html'
     context_object_name = 'artists'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ListArtistsView, self).dispatch(*args, **kwargs)
 
     def _helper_artist_info_dict(self, artist):
         return {
@@ -47,6 +57,10 @@ class ListArtistTracksView(FormView):
     template_name = 'list_artist_tracks.html'
     context_object_name = 'tracks'
     form_class = GetUserInfoForm
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ListArtistTracksView, self).dispatch(*args, **kwargs)
 
     def form_valid(self, form):
         user_name = form.cleaned_data['name']
@@ -82,6 +96,10 @@ class ListArtistTracksView(FormView):
 class CheckoutView(TemplateView):
     template_name = 'checkout.html'
 
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(CheckoutView, self).dispatch(*args, **kwargs)
+
     def get_context_data(self, **kwargs):
         kwargs['uri_index'] = reverse('index')
         kwargs['order_id'] = self.args[0]
@@ -90,6 +108,10 @@ class CheckoutView(TemplateView):
 
 class IndexView(TemplateView):
     template_name = 'index.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(IndexView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs['uri_artists'] = reverse('get_artists')

@@ -4,6 +4,8 @@ from music.views import (GetArtistsView, ListArtistsView, ListArtistTracksView,
         CheckoutView, IndexView, orderstatus_service)
 
 urlpatterns = patterns('',
+    url(r'^$', IndexView.as_view()),
+    url(r'^login/$', 'django.contrib.auth.views.login'),
     url(r'^music/$', IndexView.as_view(), name='index',),
     url(r'^music/get_artists/', GetArtistsView.as_view(), name='get_artists',),
     url(r'^music/list_artists/(.+)/$',
