@@ -55,7 +55,7 @@ class ManufacturerClient(BaseSoapClient):
 
 class CarrierClient(BaseSoapClient):
     def getBudget(self, order, name, address):
-        logger.info("Backoffice confirming %s budget"%(self.endpoint,))
+        logger.info("Backoffice asking %s for a budget"%(self.endpoint,))
         self.client.service.getBudget(order, name, address, self.get_auth_instance())
 
     def confirmBudget(self, order_id):
