@@ -2,15 +2,16 @@
 from soaplib.core.service import soap, DefinitionBase
 from soaplib.core.model.primitive import String, Integer
 from soaplib.core import Application
-from django.views.generic import FormView, ListView, TemplateView
+from django.views.generic import FormView, ListView, TemplateView, DetailView
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from music.forms import GetArtistForm, GetUserInfoForm
+from music.forms import GetArtistForm, GetUserInfoForm, GetOrderStatusForm
 from music.services import MusicBackofficeClient, OrderBackofficeClient
 from soap_handler import DjangoSOAPAdaptor
+from music.models import Order
 
 class GetArtistsView(FormView):
     template_name = 'get_artists.html'
@@ -70,6 +71,9 @@ class ListArtistTracksView(FormView):
 
         msg = OrderBackofficeClient().submit_order(tracks, user_name, address)
 
+        #Save order_id with status In Progress
+        Order.objects.create(slug=int(msg), status="Registered",)
+
         return HttpResponseRedirect(
             reverse('checkout', args=[msg])
         )
@@ -115,12 +119,40 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         kwargs['uri_artists'] = reverse('get_artists')
+        kwargs['uri_order'] = reverse('get_order')
+
         return kwargs
+
+class GetOrderStatusView(FormView):
+    template_name = 'get_order_status.html'
+    form_class = GetOrderStatusForm
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(GetOrderStatusView, self).dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        slug = form.cleaned_data['slug']
+
+        return HttpResponseRedirect(
+            reverse('list_order', args=[slug])
+        )
+
+
+class ListOrderView(DetailView):
+    context_object_name = 'order'
+    model = Order
+    template_name = 'list_order.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(ListOrderView, self).dispatch(*args, **kwargs)
 
 
 class OrderStatusService(DefinitionBase):
     @soap(Integer, String, _returns=String)
     def changeStatusOrder(self, order, status):
+        Order.objects.filter(slug=int(order)).update(status=status)
         return "OK"
 
 
