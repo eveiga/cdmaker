@@ -35,7 +35,6 @@ def calculate_budget_price(order, name, address, user_id):
 
     #Get random price
     random_price = random.randint(1,10)
-    logger.info("Calculated %d€ price"%(random_price,))
 
     #Send budget to backoffice callback endpoint
     BackofficeClient().get_budget_callback(order, random_price, user_id)
@@ -78,5 +77,5 @@ if __name__=="__main__":
     soap_application = BudgetApplication([BudgetService], 'tns')
     wsgi_application = wsgi.Application(soap_application)
     server = make_server(host, port, wsgi_application)
-    logger.info("Manufacturer serving on %s:%s"%(host,port,))
+    logger.info("Carrier serving on %s:%s"%(host,port,))
     server.serve_forever()

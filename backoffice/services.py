@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from base64 import standard_b64encode
 from hashlib import sha1
+import logging
+import os
+import sys
 
 from sqlalchemy.orm import sessionmaker
 import ujson
@@ -9,6 +12,14 @@ from models import Order, engine, create_table
 from soap_client import ManufacturerClient, CarrierClient, FrontEndClient
 from soap_definitions import manufacturers, carriers, frontend
 from rest_client import GoogleMapsApiClient
+
+pardir = os.path.abspath(os.path.pardir)
+sys.path.append(pardir)
+cdmaker = pardir.rsplit(os.path.sep)[-1]
+from cdmaker.log import logger
+
+logger.setLevel(logging.INFO)
+
 
 def generate_hmac(self, *args):
     return standard_b64encode(
@@ -53,6 +64,9 @@ def verify_and_finalize_order(order_id):
                     best_manufacturer = manufacturer
                     best_carrier = carrier
 
+        logger.info("Backoffice decided best pair: %s and %s. Lets notify both."%(
+            best_manufacturer, best_carrier,
+        ))
         Notificatior(best_manufacturer, best_carrier, order_id).notificate()
 
 

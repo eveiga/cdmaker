@@ -37,7 +37,6 @@ def calculate_budget_price(order, tracks, user_id):
 
     #Get random price
     random_price = random.randint(1,10)
-    logger.info("Calculated %d€ price"%(random_price,))
 
     #Send budget to backoffice callback endpoint
     BackofficeClient().get_budget_callback(order, random_price, user_id,)
