@@ -9,8 +9,11 @@ class RestClient(object):
         self.http = httplib2.Http()
 
     def make_request(self, url, **params):
+        encode = lambda s: s if not isinstance(s, unicode) else s.encode('utf-8')
+        encoded_items = dict((encode(k),encode(v)) for k,v in params.items())
+
         return self.http.request(
-            url+'?'+urlencode(params)
+            url+'?'+urlencode(encoded_items)
         )
 
 class LastFMClient(RestClient):
