@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import httplib2
 from urllib import urlencode
 
-import ujson
+import httplib2
 
 
 class RestClient(object):
