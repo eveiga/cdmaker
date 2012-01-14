@@ -33,14 +33,18 @@ def is_valid_request(auth):
     return expected_hmac==auth.hmac
 
 def calculate_budget_price(order, tracks, user_id):
-    sleep(10)
+    sleep(5)
 
     #Get random price
     random_price = random.randint(1,10)
 
     #Send budget to backoffice callback endpoint
     BackofficeClient().get_budget_callback(order, random_price, user_id,)
-    return
+
+def set_status_order(order, user_id):
+    sleep(5)
+
+    BackofficeClient().set_status_order(order, "Processed", user_id,)
 
 class BudgetService(DefinitionBase):
     def __init__(self, user_id, *args, **kwargs):
@@ -60,6 +64,10 @@ class BudgetService(DefinitionBase):
     @soap(Integer, Auth, _returns=String)
     def confirmBudget(self, order, auth):
         if is_valid_request(auth):
+            thread.start_new_thread(
+                set_status_order,
+                (order, self.user_id,)
+            )
             logger.info("%s Returning async request for confirmBudget"%(self.user_id,))
             return "OK"
 

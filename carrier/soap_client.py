@@ -27,7 +27,7 @@ class BackofficeClient(object):
     def __init__(self):
         self.client = Client('http://localhost:7891/?wsdl')
 
-    def get_budget_callback(self, order, price, user_id):
+    def get_auth(self, user_id):
         auth = self.client.factory.create("ns0:Auth")
         now = datetime.now()
 
@@ -35,5 +35,25 @@ class BackofficeClient(object):
         auth.timestamp = from_dt_to_ts(now)
         auth.hmac = generate_hmac(user_id, from_dt_to_ts(now), "password")
 
+        return auth
+
+    def get_budget_callback(self, order, price, user_id):
         logger.info("%s Sending %d€ for as getBudgetResponse"%(user_id, price,))
-        self.client.service.getBudgetResponse(order, price, auth)
+        self.client.service.getBudgetResponse(
+            order,
+            price,
+            self.get_auth(user_id),
+        )
+
+    def set_status_order(self, order, status, user_id):
+        logger.info("%s Sending %s as status for order number %d"%(
+            user_id,
+            status,
+            order,)
+        )
+
+        self.client.service.setStatusOrder(
+            order,
+            status,
+            self.get_auth(user_id),
+        )

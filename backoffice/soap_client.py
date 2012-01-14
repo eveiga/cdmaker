@@ -64,6 +64,11 @@ class CarrierClient(BaseSoapClient):
 
 
 class FrontEndClient(BaseSoapClient):
-    def changeStatusOrder(self, order_id):
-        logger.info("Backoffice informing frontend of change order status")
-        self.client.service.changeStatusOrder(order_id, "Processed")
+    def changeStatusOrder(self, order_id, status):
+        logger.info(
+            "Backoffice informing frontend that order %d status changed to %s"%(
+                order_id,
+                status,
+            )
+        )
+        self.client.service.changeStatusOrder(order_id, status)

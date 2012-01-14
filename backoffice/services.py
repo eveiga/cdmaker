@@ -67,32 +67,30 @@ def verify_and_finalize_order(order_id):
         logger.info("Backoffice decided best pair: %s and %s. Lets notify both."%(
             best_manufacturer, best_carrier,
         ))
-        Notificatior(best_manufacturer, best_carrier, order_id).notificate()
+        Notificator(order_id).notificate_all(best_manufacturer, best_carrier)
 
 
-class Notificatior(object):
-    def __init__(self, manufacturer, carrier, order_id):
-        self.manufacturer = manufacturer
-        self.carrier = carrier
+class Notificator(object):
+    def __init__(self, order_id):
         self.order_id = order_id
 
-    def notificate_carrier(self):
+    def notificate_carrier(self, carrier):
         CarrierClient(
-            carriers[self.carrier]
+            carriers[carrier]
         ).confirmBudget(self.order_id)
 
-    def notificate_manufacturer(self):
+    def notificate_manufacturer(self, manufacturer):
         ManufacturerClient(
-            manufacturers[self.manufacturer]['endpoint']
+            manufacturers[manufacturer]['endpoint']
         ).confirmBudget(self.order_id)
 
-    def notificate_frontend(self):
-        FrontEndClient(frontend).changeStatusOrder(self.order_id)
+    def notificate_frontend(self, status):
+        FrontEndClient(frontend).changeStatusOrder(self.order_id, status)
 
-    def notificate(self):
-        self.notificate_manufacturer()
-        self.notificate_carrier()
-        self.notificate_frontend()
+    def notificate_all(self, manufacturer, carrier):
+        self.notificate_manufacturer(manufacturer)
+        self.notificate_carrier(carrier)
+        self.notificate_frontend(status="In Progress")
 
 
 class OrderProcessor(object):

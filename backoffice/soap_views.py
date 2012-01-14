@@ -15,7 +15,7 @@ from cdmaker.log import logger
 from rest_client import LastFMClient
 from soap_definitions import Order, Auth
 from services import (OrderProcessor, is_valid_request, create_budget,
-    verify_and_finalize_order)
+    verify_and_finalize_order, Notificator)
 
 logger.setLevel(logging.INFO)
 
@@ -60,6 +60,11 @@ class OrderService(DefinitionBase):
             create_budget(auth.user_id, order, price)
             verify_and_finalize_order(order)
 
+    @soap(Integer, String, Auth, _returns=String)
+    def setStatusOrder(self, order, status, auth):
+        if is_valid_request(auth):
+            Notificator(order).notificate_frontend(status)
+            return "OK"
 
 if __name__=="__main__":
     host = sys.argv[1]
