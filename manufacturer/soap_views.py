@@ -68,7 +68,7 @@ class BudgetService(DefinitionBase):
                 set_status_order,
                 (order, self.user_id,)
             )
-            logger.info("%s Returning async request for confirmBudget"%(self.user_id,))
+            logger.info("%s Returning sync request for confirmBudget"%(self.user_id,))
             return "OK"
 
 
